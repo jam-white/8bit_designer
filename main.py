@@ -1,7 +1,12 @@
 from utils import *
 
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("8-bit Designer")
+# Calculate width and height of display and pixel size
+width = COLS * round(APPROX_WIDTH // COLS)
+height = ROWS * round(APPROX_HEIGHT // ROWS)
+pixel_size = width // COLS
+
+WIN = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Pixel Art Designer")
 
 
 def init_grid(rows, cols, color):
@@ -16,14 +21,14 @@ def init_grid(rows, cols, color):
 def draw_grid(win, grid_to_draw):
     for i, row in enumerate(grid_to_draw):
         for j, pixel in enumerate(row):
-            pygame.draw.rect(win, pixel, (j * PIXEL_SIZE, i * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE))
+            pygame.draw.rect(win, pixel, (j * pixel_size, i * pixel_size, pixel_size, pixel_size))
 
     if DRAW_GRID_LINES:
         for i in range(ROWS + 1):
-            pygame.draw.line(win, BLACK, (0, i * PIXEL_SIZE), (WIDTH, i * PIXEL_SIZE))
+            pygame.draw.line(win, BLACK, (0, i * pixel_size), (width, i * pixel_size))
 
         for i in range(COLS + 1):
-            pygame.draw.line(win, BLACK, (i * PIXEL_SIZE, 0), (i * PIXEL_SIZE, HEIGHT - TOOLBAR_HEIGHT))
+            pygame.draw.line(win, BLACK, (i * pixel_size, 0), (i * pixel_size, height - TOOLBAR_HEIGHT))
 
 
 def draw(win, grid_to_draw, buttons):
@@ -38,8 +43,8 @@ def draw(win, grid_to_draw, buttons):
 
 def get_pixel_from_pos(pos):
     x, y = pos
-    row = y // PIXEL_SIZE
-    col = x // PIXEL_SIZE
+    row = y // pixel_size
+    col = x // pixel_size
 
     if row >= ROWS:  # Raise error if the click is in the toolbar area
         raise IndexError
@@ -52,7 +57,7 @@ clock = pygame.time.Clock()
 grid = init_grid(ROWS, COLS, BG_COLOR)
 drawing_color = BLACK
 
-button_y = HEIGHT - TOOLBAR_HEIGHT//2 - 25
+button_y = height - TOOLBAR_HEIGHT//2 - 25
 buttons = [
     Button(10, button_y, 50, 50, BLACK),
     Button(70, button_y, 50, 50, RED),
@@ -75,17 +80,19 @@ while run:
                 row, col = get_pixel_from_pos(pos)
                 grid[row][col] = drawing_color
 
-            except IndexError:
+            except IndexError:  # Means click was in the toolbar area
                 for button in buttons:
                     button.selected = False
 
                     if button.clicked(pos):
-                        button.selected = True
-                        drawing_color = button.color
 
                         if button.text == "Clear":
                             grid = init_grid(ROWS, COLS, BG_COLOR)
                             drawing_color = BLACK
+
+                        else:
+                            button.selected = True
+                            drawing_color = button.color
 
     draw(WIN, grid, buttons)
 
