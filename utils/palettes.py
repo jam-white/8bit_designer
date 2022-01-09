@@ -1,6 +1,3 @@
-from .settings import *
-
-
 palettes = [
     "basic",
     "NES"
@@ -73,3 +70,8 @@ palette_colors = {
         "#787878"
     ]
 }
+
+
+def get_longest_palette(palette_dict):
+    palette_lens = [(pal, len(colors)) for pal, colors in palette_dict.items()]
+    return max(palette_lens, key=lambda x: x[1])
